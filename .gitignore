@@ -1,0 +1,9 @@
+*.out
+*.raw
+*.csv
+*.h5
+*.hdf
+__pychache__/*
+lib/*
+data/*
+.ipynb_checkpoints/*
