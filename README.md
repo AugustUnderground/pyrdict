@@ -13,6 +13,7 @@ point parameters.
 ```bash
 $ hy predict.hy     # With hy
 $ python predict.py # With Python
+$ jupyter lab       # Startup Notebook
 ```
 
 ## Installation
@@ -28,5 +29,5 @@ $ pip install -r requirements.txt
 
 - [X] Add requirements
 - [X] Add Python Script
-- [ ] Add Notebook
+- [X] Add Notebook
 

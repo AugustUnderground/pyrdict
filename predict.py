@@ -134,8 +134,8 @@ sim_res.Vbs = round(sim_res.Vbs, ndigits=2)
 
 ## Get random traces
 traces = sim_res[ (sim_res.Vbs == VSS) 
-               & (sim_res.W == random.choice(sim_res.W.unique())) 
-               & (sim_res.L == random.choice(sim_res.L.unique())) ]
+                & (sim_res.W == random.choice(sim_res.W.unique())) 
+                & (sim_res.L == random.choice(sim_res.L.unique())) ]
 
 ## Plot some results
 fig, (ax1, ax2) = plt.subplots(2, 1, sharey=False)
