@@ -3,7 +3,7 @@
 *.csv
 *.h5
 *.hdf
-__pychache__/*
+__pycache__/*
 lib/*
 data/*
 .ipynb_checkpoints/*
