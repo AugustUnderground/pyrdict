@@ -6,12 +6,13 @@ uses ASU's [PTM](http://ptm.asu.edu/) 90nm devices.
 
 ## Quickstart
 
-Adjust the *Setup* section in `predict.hy` and run the script. This will create
-an [HDF5](https://www.h5py.org/) with the specified operating point parameters.
+Adjust the *Setup* section in `predict.hy` or `predict.py` and run the script.
+This will create an [HDF5](https://www.h5py.org/) with the specified operating
+point parameters.
 
 ```bash
-$ hy predict.hy
-
+$ hy predict.hy     # With hy
+$ python predict.py # With Python
 ```
 
 ## Installation
@@ -26,6 +27,6 @@ $ pip install -r requirements.txt
 ## TODO
 
 - [X] Add requirements
-- [ ] Add Python Script
+- [X] Add Python Script
 - [ ] Add Notebook
 
