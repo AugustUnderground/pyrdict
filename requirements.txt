@@ -1,0 +1,9 @@
+h5py==3.2.1
+matplotlib
+multiprocess==0.70.11.1
+numpy==1.20.3
+numpysane==0.33
+pandas==1.2.4
+PySpice==1.5
+requests
+tqdm
