@@ -14,8 +14,18 @@ $ hy predict.hy
 
 ```
 
+## Installation
+
+Follow the PySpice [installation instructions](https://pyspice.fabrice-salvaire.fr/releases/latest/installation.html) 
+and then setup the python environment:
+
+```bash
+$ pip install -r requirements.txt
+```
+
 ## TODO
 
+- [X] Add requirements
 - [ ] Add Python Script
 - [ ] Add Notebook
 
