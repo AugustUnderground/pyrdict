@@ -16,6 +16,7 @@ import os
 import logging
 import requests
 
+## Setup file system
 lib_path    = 'lib'
 model_base  = '90nm_bulk'
 model_file  = f'{model_base}.lib' # library has to have '.lib' extension
@@ -26,6 +27,7 @@ data_path   = 'data'
 column_path = 'columns'
 pool_size   = 6
 
+## Setup simulation parameters
 temperature = 27
 VSS         = 0.0
 VDD         = 1.2
@@ -39,6 +41,7 @@ min_L       = 150e-9
 max_L       = 10e-6
 num_L       = 10
 
+## Find or download PTM model (http://ptm.asu.edu/)
 def setup_library (path, model, url):
     model_path = f'./{path}/{model}'
 
@@ -52,19 +55,24 @@ def setup_library (path, model, url):
 
     return f'./{path}'
 
-
+## Specify Model Library
 lib = SpiceLibrary(setup_library(lib_path, model_file, model_url))
 
+## Create Testbench Circuit
 ckt = Circuit('Primitive Device Characterization')
 
+## Include Library
 ckt.include(lib[device_name])
 
+## Terminal Voltage Sources
 Vd = ckt.V('d', 'D', ckt.gnd, u_V(0))
 Vg = ckt.V('g', 'G', ckt.gnd, u_V(0))
 Vb = ckt.V('b', 'B', ckt.gnd, u_V(0))
 
+## DUT
 M0 = ckt.MOSFET(0, 'D', 'G', ckt.gnd, 'B', model=device_name)
 
+## Save parameters for Database
 column_names = [ 'W',   'L' 
                , 'Vds', 'Vgs', 'Vbs', 'vth', 'vdsat'
                , 'id',  'gbs', 'gbd', 'gds', 'gm', 'gmbs'
@@ -75,11 +83,14 @@ column_names = [ 'W',   'L'
 
 save_params = [ f'@M0[{p.lower()}]' for p in column_names ]
 
+## Setup simulator
 simulator = ckt.simulator( temperature=temperature
                          , nominal_temperature=temperature )
 
+## Save specified parameters
 simulator.save_internal_parameters(*save_params)
 
+## Parallelizeable simulation function
 def sim_dc(W, L, Vbs):
     M0.w = W
     M0.l = L
@@ -93,12 +104,14 @@ def sim_dc(W, L, Vbs):
 
     return run_data
 
+## Setup sweep grid
 sweep = [ (w,l,vbs) 
           for vbs in np.arange(0.0    , -1.0  , step=-0.1)
           for l in np.linspace(150e-9 , 10e-6 , num=10)
           for w in np.linspace(1e-6   , 75e-6 , num=10) ]
 
-logging.disable(logging.FATAL)
+## Run simulation
+logging.disable(logging.FATAL)  # Disable logging
 with mp.Pool(pool_size) as pool:
     res = tqdm( pool.imap( func=lambda s: sim_dc(*s)
                          , iterable=sweep )
@@ -106,20 +119,25 @@ with mp.Pool(pool_size) as pool:
     results = list(res)
 logging.disable(logging.NOTSET)
 
+## Concatenate results into one data frame
 sim_res = pd.concat(results, ignore_index=True)
 
+## Store data frame to HDF5
 with h5.File(data_file, 'w') as h5_file:
     h5_file[data_path] = sim_res.to_numpy()
     h5_file[column_path] = list(sim_res.columns)
 
+## Round terminal voltages for easier filtering
 sim_res.Vgs = round(sim_res.Vgs, ndigits=2)
 sim_res.Vds = round(sim_res.Vds, ndigits=2)
 sim_res.Vbs = round(sim_res.Vbs, ndigits=2)
 
+## Get random traces
 traces = sim_res[ (sim_res.Vbs == VSS) 
                & (sim_res.W == random.choice(sim_res.W.unique())) 
                & (sim_res.L == random.choice(sim_res.L.unique())) ]
 
+## Plot some results
 fig, (ax1, ax2) = plt.subplots(2, 1, sharey=False)
 
 for v in traces.Vds.unique():
