@@ -121,23 +121,24 @@
 (logging.disable logging.NOTSET); logging enabled again
 
 ;;; Concatenate all data frames from parallel simulations
-(setv sim-res (pd.concat results :ignore-index True))
+(setv sim-data (pd.concat results :ignore-index True)
+      columns  ["W" "L" "Vds" "Vgs" "Vbs" 
+                "vth" "vdsat" "id"
+                "gbs" "gbd" "gds" "gm" "gmbs" 
+                "cgd" "cgb" "cgs"
+                "cds" "csb" "cdb"])
 
 ;;; Post processing the Data
-(setv sim-data (get sim-res [ "W" "L" "Vds" "Vgs" "Vbs" 
-                              "vth" "vdsat" "id"
-                              "gbs" "gbd" "gds" "gm" "gmbs" ]))
-
-(setv (get sim-data "fug") (/ (get sim-res "gm") 
-                              (* 2 np.pi (get sim-res "cgg"))))
+(setv (get sim-data "fug") (/ (get sim-data "gm") 
+                              (* 2 np.pi (get sim-data "cgg"))))
 
 (setv (, cbb csb cdb cgb
          css csd csg cds 
          cdd cdg cbs cbd
-         cbg cgd cgs cgg ) (. (get sim-res ["cbb" "csb" "cdb" "cgb"
-                                            "css" "csd" "csg" "cds" 
-                                            "cdd" "cdg" "cbs" "cbd"
-                                            "cbg" "cgd" "cgs" "cgg"])
+         cbg cgd cgs cgg ) (. (get sim-data ["cbb" "csb" "cdb" "cgb"
+                                             "css" "csd" "csg" "cds" 
+                                             "cdd" "cdg" "cbs" "cbd"
+                                             "cbg" "cgd" "cgs" "cgg"])
                               values T))
 
 (setv (get sim-data "cgd") (* (- 0.5) (+ cdg cgd)))
@@ -149,8 +150,8 @@
 
 ;;; Write data frame to file
 (with [h5-file (h5.File data-file "w")]
-  (setv (get h5-file data-path) (.to-numpy sim-data)
-        (get h5-file column-path) (list sim-data.columns)))
+  (setv (get h5-file data-path) (.to-numpy (get sim-data columns))
+        (get h5-file column-path) (list columns)))
 
 ;;; Round digits of terminal voltages for easier filtering
 (setv sim-data.Vgs (round sim-data.Vgs :ndigits 2)
