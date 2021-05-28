@@ -124,7 +124,28 @@
 (setv sim-res (pd.concat results :ignore-index True))
 
 ;;; Post processing the Data
-(setv (get sim-res "fug") (/ (get sim-res "gm") (* 2 np.pi (get sim-res "cgg"))))
+(setv sim-data (get sim-res [ "W" "L" "Vds" "Vgs" "Vbs" 
+                              "vth" "vdsat" "id"
+                              "gbs" "gbd" "gds" "gm" "gmbs" ]))
+
+(setv (get sim-data "fug") (/ (get sim-res "gm") 
+                              (* 2 np.pi (get sim-res "cgg"))))
+
+(setv (, cbb csb cdb cgb
+         css csd csg cds 
+         cdd cdg cbs cbd
+         cbg cgd cgs cgg ) (. (get sim-res ["cbb" "csb" "cdb" "cgb"
+                                            "css" "csd" "csg" "cds" 
+                                            "cdd" "cdg" "cbs" "cbd"
+                                            "cbg" "cgd" "cgs" "cgg"])
+                              values T))
+
+(setv (get sim-data "cgd") (* (- 0.5) (+ cdg cgd)))
+(setv (get sim-data "cgb") (+ cgg (* 0.5 (+ cdg cgd  csg cgs))))
+(setv (get sim-data "cgs") (* (- 0.5) (+ cgs csg)) )
+(setv (get sim-data "cds") (* (- 0.5) (+ cds csd)) )
+(setv (get sim-data "csb") (+ css (* 0.5 (+ cds cgs csd cgs))))
+(setv (get sim-data "cdb") (+ cdd (* 0.5 (+ cdg cds cgd csd))))
 
 ;;; Write data frame to file
 (with [h5-file (h5.File data-file "w")]
