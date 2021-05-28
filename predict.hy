@@ -149,22 +149,22 @@
 
 ;;; Write data frame to file
 (with [h5-file (h5.File data-file "w")]
-  (setv (get h5-file data-path) (.to-numpy sim-res)
-        (get h5-file column-path) (list sim-res.columns)))
+  (setv (get h5-file data-path) (.to-numpy sim-data)
+        (get h5-file column-path) (list sim-data.columns)))
 
 ;;; Round digits of terminal voltages for easier filtering
-(setv sim-res.Vgs (round sim-res.Vgs :ndigits 2)
-      sim-res.Vds (round sim-res.Vds :ndigits 2)
-      sim-res.Vbs (round sim-res.Vbs :ndigits 2))
+(setv sim-data.Vgs (round sim-data.Vgs :ndigits 2)
+      sim-data.Vds (round sim-data.Vds :ndigits 2)
+      sim-data.Vbs (round sim-data.Vbs :ndigits 2))
 
 ;;; Extract random Trace
-(setv traces (get sim-res (& (= sim-res.Vbs VSS)
-                             (= sim-res.W (random.choice (.unique sim-res.W)))
-                             (= sim-res.L (random.choice (.unique sim-res.L))))))
+(setv traces (get sim-data (& (= sim-data.Vbs VSS)
+                              (= sim-data.W (random.choice (.unique sim-data.W)))
+                              (= sim-data.L (random.choice (.unique sim-data.L))))))
 
 ;;; Plot output and transfer characteristics
 (setv (, fig (, ax1 ax2)) (plt.subplots 2 1 :sharey False))
-(for [v (.unique traces.Vds)]
+(for [v (np.random.choice (.unique traces.Vds) 5 :replace False)]
   (let [trace (get traces (= traces.Vds v))]
     (ax1.plot trace.Vgs trace.id :label f"Vds = {v} V")))
 (ax1.grid)
@@ -172,7 +172,7 @@
 (ax1.set-xlabel "Vgs [V]")
 (ax1.set-ylabel "Id [A]")
 (ax1.legend)
-(for [v (.unique traces.Vgs)]
+(for [v (np.random.choice (.unique traces.Vgs) 5 :replace False)]
   (let [trace (get traces (= traces.Vgs v))]
     (ax2.plot trace.Vds trace.id :label f"Vgs = {v} V")))
 (ax2.grid)
