@@ -120,27 +120,50 @@ with mp.Pool(pool_size) as pool:
 logging.disable(logging.NOTSET)
 
 ## Concatenate results into one data frame
-sim_res = pd.concat(results, ignore_index=True)
+sim_data = pd.concat(results, ignore_index=True)
+columns  = [ 'W','L','Vds','Vgs','Vbs' 
+           , 'vth','vdsat','id'
+           , 'gbs','gbd','gds','gm','gmbs' 
+           , 'cgd','cgb','cgs'
+           , 'cds','csb','cdb' ]
+
+## Post processing the Data
+sim_data['fug'] = sim_data['gm'] / (2 * np.pi * sim_data['cgg'])
+
+cbb,csb,cdb,cgb,\
+css,csd,csg,cds,\
+cdd,cdg,cbs,cbd,\
+cbg,cgd,cgs,cgg = sim_data[ [ 'cbb','csb','cdb','cgb'
+                            , 'css','csd','csg','cds'
+                            , 'cdd','cdg','cbs','cbd'
+                            , 'cbg','cgd','cgs','cgg' ] ].values.T
+
+sim_data['cgd'] = -0.5 * (cdg + cgd)
+sim_data['cgb'] = cgg + (0.5 * ( cdg + cgd + csg + cgs ))
+sim_data['cgs'] = -0.5 * (cgs + csg)
+sim_data['cds'] = -0.5 * (cds + csd)
+sim_data['csb'] = css + (0.5 * ( cds + cgs + csd + cgs ))
+sim_data['cdb'] = cdd + (0.5 * ( cdg + cds + cgd + csd ))
 
 ## Store data frame to HDF5
 with h5.File(data_file, 'w') as h5_file:
-    h5_file[data_path] = sim_res.to_numpy()
-    h5_file[column_path] = list(sim_res.columns)
+    h5_file[data_path] = sim_data[columns].to_numpy()
+    h5_file[column_path] = columns
 
 ## Round terminal voltages for easier filtering
-sim_res.Vgs = round(sim_res.Vgs, ndigits=2)
-sim_res.Vds = round(sim_res.Vds, ndigits=2)
-sim_res.Vbs = round(sim_res.Vbs, ndigits=2)
+sim_data.Vgs = round(sim_data.Vgs, ndigits=2)
+sim_data.Vds = round(sim_data.Vds, ndigits=2)
+sim_data.Vbs = round(sim_data.Vbs, ndigits=2)
 
 ## Get random traces
-traces = sim_res[ (sim_res.Vbs == VSS) 
-                & (sim_res.W == random.choice(sim_res.W.unique())) 
-                & (sim_res.L == random.choice(sim_res.L.unique())) ]
+traces = sim_data[ (sim_data.Vbs == VSS) 
+                 & (sim_data.W == random.choice(sim_data.W.unique())) 
+                 & (sim_data.L == random.choice(sim_data.L.unique())) ]
 
 ## Plot some results
 fig, (ax1, ax2) = plt.subplots(2, 1, sharey=False)
 
-for v in traces.Vds.unique():
+for v in np.random.choice(traces.Vds.unique(), 5, replace=False):
     trace = traces[(traces.Vds == v)]
     ax1.plot(trace.Vgs, trace.id, label = f'Vds = {v} V')
 ax1.grid()
@@ -148,7 +171,7 @@ ax1.set_yscale('log')
 ax1.set_xlabel('Vds [V]')
 ax1.set_ylabel('Id [A]')
 ax1.legend()
-for v in traces.Vgs.unique():
+for v in np.random.choice(traces.Vgs.unique(), 5, replace=False):
     trace = traces[(traces.Vgs == v)]
     ax2.plot(trace.Vds, trace.id, label = f'Vgs = {v} V')
 ax2.grid()
