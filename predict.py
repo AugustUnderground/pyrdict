@@ -171,6 +171,7 @@ ax1.set_yscale('log')
 ax1.set_xlabel('Vds [V]')
 ax1.set_ylabel('Id [A]')
 ax1.legend()
+
 for v in np.random.choice(traces.Vgs.unique(), 5, replace=False):
     trace = traces[(traces.Vgs == v)]
     ax2.plot(trace.Vds, trace.id, label = f'Vgs = {v} V')
