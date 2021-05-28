@@ -121,6 +121,7 @@
 (logging.disable logging.NOTSET); logging enabled again
 
 ;;; Concatenate all data frames from parallel simulations
+;;; and specify columns to be saved
 (setv sim-data (pd.concat results :ignore-index True)
       columns  ["W" "L" "Vds" "Vgs" "Vbs" 
                 "vth" "vdsat" "id"
@@ -142,7 +143,7 @@
                               values T))
 
 (setv (get sim-data "cgd") (* (- 0.5) (+ cdg cgd)))
-(setv (get sim-data "cgb") (+ cgg (* 0.5 (+ cdg cgd  csg cgs))))
+(setv (get sim-data "cgb") (+ cgg (* 0.5 (+ cdg cgd csg cgs))))
 (setv (get sim-data "cgs") (* (- 0.5) (+ cgs csg)) )
 (setv (get sim-data "cds") (* (- 0.5) (+ cds csd)) )
 (setv (get sim-data "csb") (+ css (* 0.5 (+ cds cgs csd cgs))))
@@ -151,7 +152,7 @@
 ;;; Write data frame to file
 (with [h5-file (h5.File data-file "w")]
   (setv (get h5-file data-path) (.to-numpy (get sim-data columns))
-        (get h5-file column-path) (list columns)))
+        (get h5-file column-path) columns))
 
 ;;; Round digits of terminal voltages for easier filtering
 (setv sim-data.Vgs (round sim-data.Vgs :ndigits 2)
