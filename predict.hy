@@ -123,6 +123,9 @@
 ;;; Concatenate all data frames from parallel simulations
 (setv sim-res (pd.concat results :ignore-index True))
 
+;;; Post processing the Data
+(setv (get sim-res "fug") (/ (get sim-res "gm") (* 2 np.pi (get sim-res "cgg"))))
+
 ;;; Write data frame to file
 (with [h5-file (h5.File data-file "w")]
   (setv (get h5-file data-path) (.to-numpy sim-res)
