@@ -25,9 +25,7 @@
       model-file f"{model-base}.lib" ; library has to have '.lib' extension
       model-url f"http://ptm.asu.edu/modelcard/2006/{model-base}.pm"
       device-name "nmos"
-      data-file f"{model-base}.h5"
-      data-path "data"
-      column-path "columns"
+      output-format "csv"
       pool-size 6)
 
 ;;; Setup Simulation and Device Parameters
@@ -149,10 +147,17 @@
 (setv (get sim-data "csb") (+ css (* 0.5 (+ cds cgs csd cgs))))
 (setv (get sim-data "cdb") (+ cdd (* 0.5 (+ cdg cds cgd csd))))
 
-;;; Write data frame to file
-(with [h5-file (h5.File data-file "w")]
-  (setv (get h5-file data-path) (.to-numpy (get sim-data columns))
-        (get h5-file column-path) columns))
+;;; Write data frame to disk
+(cond [(in output-format ["hdf" "hdf5" "h5"])
+       (print f"Writing data to HDF ...\n")
+       (with [h5-file (h5.File f"{model-base}.h5" "w")]
+         (for [col columns]
+           (setv (get h5-file col) (.to-numpy (get sim-data col))))) ]
+      [(= output-format "csv")
+       (print f"Writing data to CSV ...\n")
+       (sim-data.to-csv f"{model-base}.csv" :index False)]
+      [True
+       (print f"No supported file format specified, data won't be written.\n")])
 
 ;;; Round digits of terminal voltages for easier filtering
 (setv sim-data.Vgs (round sim-data.Vgs :ndigits 2)
