@@ -122,7 +122,7 @@
 ;;; and specify columns to be saved
 (setv sim-data (pd.concat results :ignore-index True)
       columns  ["W" "L" "Vds" "Vgs" "Vbs" 
-                "vth" "vdsat" "id"
+                "vth" "vdsat" "id" "fug"
                 "gbs" "gbd" "gds" "gm" "gmbs" 
                 "cgd" "cgb" "cgs"
                 "cds" "csb" "cdb"])

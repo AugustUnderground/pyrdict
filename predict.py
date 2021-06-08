@@ -120,7 +120,7 @@ logging.disable(logging.NOTSET)
 ## Concatenate results into one data frame
 sim_data = pd.concat(results, ignore_index=True)
 columns  = [ 'W','L','Vds','Vgs','Vbs' 
-           , 'vth','vdsat','id'
+           , 'vth','vdsat','id', 'fug'
            , 'gbs','gbd','gds','gm','gmbs' 
            , 'cgd','cgb','cgs'
            , 'cds','csb','cdb' ]
@@ -145,10 +145,12 @@ sim_data['cdb'] = cdd + (0.5 * ( cdg + cds + cgd + csd ))
 
 ## Write data frame to disk
 if output_format in ['hdf5', 'hdf', 'h5']:
+    print(f'Writing data to HDF ...\n')
     with h5.File(data_file, 'w') as h5_file:
         for col in columns:
             h5_file[col] = sim_data[col].to_numpy()
 elif output_format == 'csv':
+    print(f'Writing data to CSV ...\n')
     sim_data.to_csv(f'{model_base}.csv')
 else:
     print(f'No supported file format specified, data won\'t be written.\n')
