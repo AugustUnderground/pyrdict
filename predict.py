@@ -22,7 +22,7 @@ model_base    = '90nm_bulk'
 model_file    = f'{model_base}.lib' # library has to have '.lib' extension
 model_url     = f'http://ptm.asu.edu/modelcard/2006/{model_base}.pm'
 device_name   = 'nmos'
-output_format = 'hdf5'
+output_format = 'csv'
 pool_size     = 6
 
 ## Setup simulation parameters

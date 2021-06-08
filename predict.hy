@@ -25,7 +25,7 @@
       model-file f"{model-base}.lib" ; library has to have '.lib' extension
       model-url f"http://ptm.asu.edu/modelcard/2006/{model-base}.pm"
       device-name "nmos"
-      output-format "csv"
+      output-format "hdf"
       pool-size 6)
 
 ;;; Setup Simulation and Device Parameters
