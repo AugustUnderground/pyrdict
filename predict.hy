@@ -22,9 +22,9 @@
 ;;; Setup file system
 (setv lib-path "lib"
       model-base "90nm_bulk"
+      device-name "pmos"
       model-file f"{model-base}.lib" ; library has to have '.lib' extension
       model-url f"http://ptm.asu.edu/modelcard/2006/{model-base}.pm"
-      device-name "nmos"
       output-format "hdf"
       pool-size 6)
 
@@ -150,12 +150,12 @@
 ;;; Write data frame to disk
 (cond [(in output-format ["hdf" "hdf5" "h5"])
        (print f"Writing data to HDF ...\n")
-       (with [h5-file (h5.File f"{model-base}.h5" "w")]
+       (with [h5-file (h5.File f"{model-base}-{device-name}.h5" "w")]
          (for [col columns]
            (setv (get h5-file col) (.to-numpy (get sim-data col))))) ]
       [(= output-format "csv")
        (print f"Writing data to CSV ...\n")
-       (sim-data.to-csv f"{model-base}.csv" :index False)]
+       (sim-data.to-csv f"{model-base}-{device-name}.csv" :index False)]
       [True
        (print f"No supported file format specified, data won't be written.\n")])
 
