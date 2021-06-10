@@ -125,7 +125,8 @@
                 "vth" "vdsat" "id" "fug"
                 "gbs" "gbd" "gds" "gm" "gmbs" 
                 "cgd" "cgb" "cgs"
-                "cds" "csb" "cdb"])
+                "cds" "csb" "cdb"
+                "gmid" "jd" "a0"])
 
 ;;; Post processing the Data
 

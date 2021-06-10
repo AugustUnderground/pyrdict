@@ -123,7 +123,8 @@ columns  = [ 'W','L','Vds','Vgs','Vbs'
            , 'vth','vdsat','id', 'fug'
            , 'gbs','gbd','gds','gm','gmbs' 
            , 'cgd','cgb','cgs'
-           , 'cds','csb','cdb' ]
+           , 'cds','csb','cdb'
+           , 'gmid', 'jd', 'a0' ]
 
 ## Post processing the Data
 sim_data['fug'] = sim_data['gm'] / (2 * np.pi * sim_data['cgg'])
