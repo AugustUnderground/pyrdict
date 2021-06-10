@@ -19,10 +19,10 @@ import requests
 ## Setup file system
 lib_path      = 'lib'
 model_base    = '90nm_bulk'
-device_name   = 'nmos'
+device_name   = 'pmos'
 model_file    = f'{model_base}.lib' # library has to have '.lib' extension
 model_url     = f'http://ptm.asu.edu/modelcard/2006/{model_base}.pm'
-output_format = 'csv'
+output_format = 'h5'
 pool_size     = 6
 
 ## Setup simulation parameters
@@ -143,15 +143,19 @@ sim_data['cds'] = -0.5 * (cds + csd)
 sim_data['csb'] = css + (0.5 * ( cds + cgs + csd + cgs ))
 sim_data['cdb'] = cdd + (0.5 * ( cdg + cds + cgd + csd ))
 
+sim_data['gmid'] = sim_data['gm'] / sim_data['id']
+sim_data['a0'] = sim_data['gm'] / sim_data['gds']
+sim_data['jd'] = sim_data['id'] / sim_data['W']
+
 ## Write data frame to disk
 if output_format in ['hdf5', 'hdf', 'h5']:
     print(f'Writing data to HDF ...\n')
-    with h5.File(f'{model_base}-{device_name}.h5', 'w') as h5_file:
+    with h5.File(f'{model_base}_{device_name}.h5', 'w') as h5_file:
         for col in columns:
             h5_file[col] = sim_data[col].to_numpy()
 elif output_format == 'csv':
     print(f'Writing data to CSV ...\n')
-    sim_data.to_csv(f'{model_base}-{device_name}.csv')
+    sim_data.to_csv(f'{model_base}_{device_name}.csv')
 else:
     print(f'No supported file format specified, data won\'t be written.\n')
 

@@ -128,9 +128,12 @@
                 "cds" "csb" "cdb"])
 
 ;;; Post processing the Data
+
+;; Unity Gain Frequency has to be calculated
 (setv (get sim-data "fug") (/ (get sim-data "gm") 
                               (* 2 np.pi (get sim-data "cgg"))))
 
+;; The capacitance model is not usable the way it's returned by the simulator
 (setv (, cbb csb cdb cgb
          css csd csg cds 
          cdd cdg cbs cbd
@@ -145,17 +148,23 @@
 (setv (get sim-data "cgs") (* (- 0.5) (+ cgs csg)) )
 (setv (get sim-data "cds") (* (- 0.5) (+ cds csd)) )
 (setv (get sim-data "csb") (+ css (* 0.5 (+ cds cgs csd cgs))))
-(setv (get sim-data "cdb") (+ cdd (* 0.5 (+ cdg cds cgd csd))))
+(setv (get sim-data "cdb") (+ cdd (* 0.5 (+ cdg cds cgd csd)))) 
+
+;; Some other parameters are interesting for circuit design 
+;; and/or machine learning
+(setv (get sim-data "gmid") (/ (get sim-data "gm") (get sim-data "id")))
+(setv (get sim-data "a0") (/ (get sim-data "gm") (get sim-data "gds")))
+(setv (get sim-data "jd") (/ (get sim-data "id") (get sim-data "W")))
 
 ;;; Write data frame to disk
 (cond [(in output-format ["hdf" "hdf5" "h5"])
        (print f"Writing data to HDF ...\n")
-       (with [h5-file (h5.File f"{model-base}-{device-name}.h5" "w")]
+       (with [h5-file (h5.File f"{model-base}_{device-name}.h5" "w")]
          (for [col columns]
            (setv (get h5-file col) (.to-numpy (get sim-data col))))) ]
       [(= output-format "csv")
        (print f"Writing data to CSV ...\n")
-       (sim-data.to-csv f"{model-base}-{device-name}.csv" :index False)]
+       (sim-data.to-csv f"{model-base}_{device-name}.csv" :index False)]
       [True
        (print f"No supported file format specified, data won't be written.\n")])
 
