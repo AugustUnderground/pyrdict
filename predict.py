@@ -152,8 +152,8 @@ sim_data['csb'] = css + (0.5 * ( cds + cgs + csd + cgs ))
 sim_data['cdb'] = cdd + (0.5 * ( cdg + cds + cgd + csd ))
 
 sim_data['gmid'] = sim_data['gm'] / sim_data['id']
-sim_data['a0'] = sim_data['gm'] / sim_data['gds']
-sim_data['jd'] = sim_data['id'] / sim_data['W']
+sim_data['a0']   = sim_data['gm'] / sim_data['gds']
+sim_data['jd']   = sim_data['id'] / sim_data['W']
 
 ## Write data frame to disk
 if output_format in ['hdf5', 'hdf', 'h5']:
