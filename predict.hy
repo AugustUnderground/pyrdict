@@ -42,6 +42,16 @@
       max-L 10e-6
       num-L 10)
 
+;;; Set the voltage sweep according to the device type
+; For NMOS sweep Vss ≤ V_DS ≤ Vdd and Vss ≤ V_GS ≤ Vdd
+; For PMOS sweep -Vdd ≤ V_DS ≤ Vss and -Vdd ≤ V_GS ≤ Vss
+(setv (, vds-sweep vgs-sweep) 
+      (if (= device-name "nmos")
+          (, (slice VSS VDD step-DC)
+             (slice VSS VDD step-DC))
+          (, (slice (- VDD) VSS step-DC)
+             (slice (- VDD) VSS step-DC))))
+      
 ;;; Download PTM Transistor model from ASU (http://ptm.asu.edu/)
 (defn setup-library [path model url]
   (let [model-path f"./{path}/{model}"]
@@ -96,8 +106,9 @@
   (setv M0.w W
         M0.l L
         Vb.dc-value (u-V Vbs)
-        analysis (simulator.dc :vd (slice VSS VDD step-DC)
-                               :vg (slice VSS VDD step-DC)))
+        analysis (simulator.dc :vd vds-sweep    ;(slice VSS VDD step-DC)
+                               :vg vgs-sweep )) ;(slice VSS VDD step-DC)))
+
   (pd.DataFrame (dfor p (zip column-names save-params)
                         [ (first p) 
                           (.as-ndarray (get analysis (second p))) ])))
@@ -159,12 +170,12 @@
 
 ;;; Write data frame to disk
 (cond [(in output-format ["hdf" "hdf5" "h5"])
-       (print f"Writing data to HDF ...\n")
+       (print f"Writing data to HDF ...")
        (with [h5-file (h5.File f"{model-base}_{device-name}.h5" "w")]
          (for [col columns]
            (setv (get h5-file col) (.to-numpy (get sim-data col))))) ]
       [(= output-format "csv")
-       (print f"Writing data to CSV ...\n")
+       (print f"Writing data to CSV ...")
        (sim-data.to-csv f"{model-base}_{device-name}.csv" :index False)]
       [True
        (print f"No supported file format specified, data won't be written.\n")])

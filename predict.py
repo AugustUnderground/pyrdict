@@ -39,6 +39,14 @@ min_L       = 150e-9
 max_L       = 10e-6
 num_L       = 10
 
+### Set the voltage sweep according to the device type
+# For NMOS sweep Vss ≤ V_DS ≤ Vdd and Vss ≤ V_GS ≤ Vdd
+# For PMOS sweep -Vdd ≤ V_DS ≤ Vss and -Vdd ≤ V_GS ≤ Vss
+vds_sweep = slice(VSS, VDD, step_DC) if device_name == 'nmos' \
+                                     else slice(-VDD, VSS, step_DC)
+vgs_sweep = slice(VSS, VDD, step_DC) if device_name == 'nmos' \
+                                     else slice(-VDD, VSS, step_DC)
+
 ## Find or download PTM model (http://ptm.asu.edu/)
 def setup_library (path, model, url):
     model_path = f'./{path}/{model}'
@@ -94,8 +102,7 @@ def sim_dc(W, L, Vbs):
     M0.l = L
     Vb.dc_value = u_V(Vbs)
 
-    analysis = simulator.dc( vd=slice(VSS, VDD, step_DC)
-                           , vg=slice(VSS, VDD, step_DC))
+    analysis = simulator.dc(vd=vds_sweep, vg=vgs_sweep)
 
     run_data = pd.DataFrame( { p[0]: analysis[p[1]].as_ndarray() 
                                for p in zip(column_names, save_params) } )
@@ -150,12 +157,12 @@ sim_data['jd'] = sim_data['id'] / sim_data['W']
 
 ## Write data frame to disk
 if output_format in ['hdf5', 'hdf', 'h5']:
-    print(f'Writing data to HDF ...\n')
+    print(f'Writing data to HDF ...')
     with h5.File(f'{model_base}_{device_name}.h5', 'w') as h5_file:
         for col in columns:
             h5_file[col] = sim_data[col].to_numpy()
 elif output_format == 'csv':
-    print(f'Writing data to CSV ...\n')
+    print(f'Writing data to CSV ...')
     sim_data.to_csv(f'{model_base}_{device_name}.csv')
 else:
     print(f'No supported file format specified, data won\'t be written.\n')
